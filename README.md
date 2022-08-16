@@ -146,4 +146,36 @@ ll
 -rw-r--r--. 1 root root     0 Aug 16 15:13 file8\
 -rw-r--r--. 1 root root     0 Aug 16 15:13 file9
 
+- на нашей куче дисков попробовать поставить btrfs/zfs, с кешем и снэпшотами, разметить здесь каталог /opt
 
+
+lvcreate -l+50FREE -n opt /dev/test # создан раздел лвм
+mkfs.btrfs /dev/test/opt # создана фс btrfs
+
+Label:              (null)\
+UUID:               f86fe4bd-b01d-4088-ba47-20dd5d947e25\
+Node size:          16384\
+Sector size:        4096\
+Filesystem size:    1.50GiB\
+Block group profiles:\
+  Data:             single            8.00MiB\
+  Metadata:         DUP              76.56MiB\
+  System:           DUP               8.00MiB\
+SSD detected:       no\
+Incompat features:  extref, skinny-metadata\
+Number of devices:  1\
+Devices:\
+ ID        SIZE  PATH\
+    1     1.50GiB  /dev/test/opt
+
+lvcreate -l+50%FREE -s -n opt-snap /dev/test/opt # создан snapshot
+
+  opt      test       owi-a-s---  <1.50g \                                                   
+  opt-snap test       swi-a-s--- 764.00m  
+  
+lvcreate -n main_cache -L 300M test /dev/sdc # создан кэш
+
+ main_cache test       -wi-a----- 300.00m\                                                    
+ opt        test       -wi-a-----  <1.50g 
+
+mount /dev/test/opt /opt/ # размещен каталог opt
